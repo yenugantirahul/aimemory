@@ -3,17 +3,24 @@ import "dotenv/config";
 import app from "./app.js";
 import { connectDB } from "./database/db.js";
 import { toNodeHandler } from "better-auth/node";
-
-import {auth} from "./auth.js"
+import  chatRouter  from "./chat/chat.routes.js";
+import { auth } from "./auth.js";
 
 const PORT = process.env.PORT || 5000;
 app.all("/api/auth/*path", toNodeHandler(auth));
-async function start() {
-  await connectDB();
+app.use("/api/chat", chatRouter);
 
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on ${PORT}`);
-  });
+async function start() {
+  try {
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on ${PORT}`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
 }
 
 start();
