@@ -3,7 +3,7 @@ import "dotenv/config";
 import app from "./app.js";
 import { connectDB } from "./database/db.js";
 import { toNodeHandler } from "better-auth/node";
-import  chatRouter  from "./chat/chat.routes.js";
+import  chatRouter  from "./modules/chat/chat.routes.js";
 import { auth } from "./auth.js";
 
 const PORT = process.env.PORT || 5000;
