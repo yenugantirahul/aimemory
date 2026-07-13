@@ -15,12 +15,26 @@ export class GeminiService {
     });
   }
 
-  async generate(prompt: string) {
+  async generate(prompt: string, modelName: string) {
     const response = await this.ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+      model: modelName,
       contents: prompt,
     });
 
     return response.text;
+  }
+
+  async generateEmdb(prompt: string, modelName: string): Promise<number[]> {
+    const response = await this.ai.models.embedContent({
+      model: modelName,
+      contents: prompt,
+    });
+    const embedding = response.embeddings?.[0]?.values;
+
+    if (!embedding) {
+      throw new Error("Failed to generate embedding");
+    }
+
+    return embedding;
   }
 }

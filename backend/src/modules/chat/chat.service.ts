@@ -4,11 +4,5 @@ export const chatService = {
   async getResponse(prompt: string) {
     return await llmService.getAiResponse(prompt);
   },
-  remember() {
-    return memoryController.remember()
-  },
-  retrieve() {
-    return memoryController.retrieve()
-  }
   
 };

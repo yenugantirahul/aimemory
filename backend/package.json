@@ -24,6 +24,7 @@
   "type": "module",
   "dependencies": {
     "@google/genai": "^2.11.0",
+    "@qdrant/js-client-rest": "^1.18.0",
     "@types/cors": "^2.8.19",
     "better-auth": "^1.6.23",
     "cors": "^2.8.6",

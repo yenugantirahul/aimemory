@@ -1,10 +1,10 @@
 import { memoryService } from "./memory.service.js"
 
 export const memoryController = {
-    remember() {
-        return memoryService.rememberMemories()
+   async remember(prompt: string) {
+        return memoryService.rememberMemories(prompt)
     },
     retrieve() {
         return memoryService.retrieveMemories()
-    }
+    },
 }
