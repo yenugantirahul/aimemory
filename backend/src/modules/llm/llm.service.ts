@@ -1,5 +1,9 @@
+import { GeminiService } from "../../clients/gemini.client.js";
+
+const gemini = new GeminiService();
 export const llmService = {
-  getAiResponse(prompt: string) {
-    return `AI generated response: ${prompt}`;
+  async getAiResponse(prompt: string) {
+    const res = await gemini.generate(prompt);
+    return res;
   },
 };
