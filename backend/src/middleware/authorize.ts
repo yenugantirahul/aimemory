@@ -6,8 +6,18 @@ export async function authMiddleware(
     res: Response,
     next: NextFunction
 ) {
+    const headers = new Headers();
+
+    for (const [key, value] of Object.entries(req.headers)) {
+        if (typeof value === "string") {
+            headers.append(key, value);
+        } else if (Array.isArray(value)) {
+            value.forEach((v) => headers.append(key, v));
+        }
+    }
+
     const session = await auth.api.getSession({
-        headers: req.headers,
+        headers,
     });
 
     if (!session) {
@@ -16,7 +26,6 @@ export async function authMiddleware(
         });
     }
 
-    // Make the user available to later handlers
     req.user = session.user;
 
     next();
