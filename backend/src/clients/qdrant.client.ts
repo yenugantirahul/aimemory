@@ -1,6 +1,5 @@
-// qdrant.client.ts
-
 import { QdrantClient } from "@qdrant/js-client-rest";
+import { randomUUID, UUID } from "node:crypto";
 
 const client = new QdrantClient({
   host: "localhost",
@@ -8,22 +7,65 @@ const client = new QdrantClient({
 });
 
 export const qdrantService = {
-  async upsertMemory(embedding: number[], payload: Record<string, any>) {
-    return client.upsert("memories", {
+  async createCollection() {
+    await client.deleteCollection("memories");
+    const collections = await client.getCollections();
+
+    const exists = collections.collections.some(
+      (collection) => collection.name === "memories",
+    );
+
+    if (!exists) {
+      await client.createCollection("memories", {
+        vectors: {
+          size: 3072, // Gemini text-embedding-004
+          distance: "Cosine",
+        },
+      });
+
+      console.log("Created 'memories' collection");
+    }
+  },
+
+  async upsertMemory(
+    userId: string,
+    embedding: number[],
+    payload: Record<string, any>,
+  ) {
+   
+    const memoryId = randomUUID();
+
+    await client.upsert("memories", {
       wait: true,
       points: [
         {
-          id: crypto.randomUUID(),
+          id: memoryId,
           vector: embedding,
-          payload,
+          payload: {
+            ...payload,
+            userId,
+          },
         },
       ],
     });
+
+    return memoryId;
   },
-  async searchMemory(embedding: number[], limit = 5) {
+
+  async searchMemory(userId: UUID, embedding: number[], limit: number) {
     return client.search("memories", {
       vector: embedding,
       limit,
+      filter: {
+        must: [
+          {
+            key: "userId",
+            match: {
+              value: userId,
+            },
+          },
+        ],
+      },
     });
   },
 };

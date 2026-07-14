@@ -20,6 +20,7 @@ export class GeminiService {
       model: modelName,
       contents: prompt,
     });
+    
 
     return response.text;
   }

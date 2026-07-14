@@ -31,6 +31,29 @@ services:
     volumes:
       - qdrant-data:/qdrant/storage
 
+  neo4j:
+    image: neo4j:5
+    container_name: ai-memory-neo4j
+
+    restart: always
+
+    environment:
+      NEO4J_AUTH: neo4j/password
+
+    ports:
+      - "7474:7474"   # Neo4j Browser
+      - "7687:7687"   # Bolt protocol for applications
+
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+      - neo4j-import:/import
+      - neo4j-plugins:/plugins
+
 volumes:
   postgres-data:
   qdrant-data:
+  neo4j-data:
+  neo4j-logs:
+  neo4j-import:
+  neo4j-plugins:

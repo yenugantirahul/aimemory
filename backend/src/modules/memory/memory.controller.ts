@@ -1,10 +1,11 @@
+import { UUID } from "node:crypto"
 import { memoryService } from "./memory.service.js"
 
 export const memoryController = {
-   async remember(prompt: string) {
-        return memoryService.rememberMemories(prompt)
+   async remember(userId: UUID, prompt: string) {
+        return memoryService.rememberMemories(userId, prompt)
     },
-    retrieve() {
-        return memoryService.retrieveMemories()
+    retrieve(userId: UUID, prompt: string) {
+        return memoryService.retrieveMemories(userId, prompt)
     },
 }
