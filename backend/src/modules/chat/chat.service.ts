@@ -1,29 +1,49 @@
-import { randomUUID, UUID } from "node:crypto";
+import { UUID } from "node:crypto";
 import { llmService } from "../llm/llm.service.js";
-import { memoryController } from "../memory/memory.controller.js";
+import { memoryService } from "../memory/memory.service.js";
 
 export const chatService = {
   async getResponse(userId: UUID, prompt: string) {
-    const stored = await memoryController.retrieve(userId, prompt);
-    const memoryText = stored
+    // Retrieve memories
+    const stored = await memoryService.retrieveMemories(userId, prompt);
+
+    const memories = stored.qdrantMemories;
+    const relations = stored.relations;
+
+    // Format semantic memories
+    const memoryText = memories
       .map((memory) => `- ${memory.payload?.prompt}`)
       .join("\n");
 
+    // Format graph relationships
+    const relationText = relations
+      .map((relation) => `- User ${relation.relation} ${relation.entity}`)
+      .join("\n");
+
+    // Build prompt
     const finalPrompt = `
 You are a helpful AI assistant.
 
-Relevant memories:
-${memoryText}
+Relevant Memories:
+${memoryText || "None"}
 
-Current user message:
+Known Facts:
+${relationText || "None"}
+
+Current User Message:
 ${prompt}
 
-Answer naturally using the memories only if they are relevant.
+Answer naturally using the memories and known facts only if they are relevant.
 `;
-    const res = await llmService.getAiResponse(finalPrompt);
-    if (res != undefined) {
-      await memoryController.remember(userId, res);
+
+    // Generate AI response
+    const response = await llmService.getAiResponse(finalPrompt);
+
+    // Store ONLY the user's message
+    if (response) {
+      await memoryService.rememberMemories(userId, prompt);
     }
-    return res;
+
+    return response;
   },
 };
