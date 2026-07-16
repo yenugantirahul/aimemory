@@ -16,21 +16,19 @@ export const memoryService = {
   },
 
   // Retrieve memories from Qdrant
-  async retrieveMemories(userId: UUID, prompt: string) {
-    const embedding = await this.generateEmbedding(prompt);
+ async retrieveMemories(userId: UUID, prompt: string) {
+  const embedding = await this.generateEmbedding(prompt);
 
-    const qdrantMemories = await qdrantService.searchMemory(
-      userId,
-      embedding,
-      5,
-    );
-    const relations = await neo4jService.search(userId);
+  const [qdrantMemories, relations] = await Promise.all([
+    qdrantService.searchMemory(userId, embedding, 5),
+    neo4jService.search(userId),
+  ]);
 
-    return {
-      qdrantMemories,
-      relations,
-    };
-  },
+  return {
+    qdrantMemories,
+    relations,
+  };
+},
 
   // Insert relationships into neo4j
   async insertRelationships(userId: UUID, prompt: string) {

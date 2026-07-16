@@ -1,7 +1,7 @@
 import { UUID } from "node:crypto";
 import { llmService } from "../llm/llm.service.js";
 import { memoryService } from "../memory/memory.service.js";
-
+import { helloWorldTask } from "../../trigger/example.js";
 export const chatService = {
   async getResponse(userId: UUID, prompt: string) {
     // Retrieve memories
@@ -39,9 +39,10 @@ Answer naturally using the memories and known facts only if they are relevant.
     // Generate AI response
     const response = await llmService.getAiResponse(finalPrompt);
 
-    // Store ONLY the user's message
+    // Queue memory processing in the background
     if (response) {
-      await memoryService.rememberMemories(userId, prompt);
+      
+      await helloWorldTask.trigger({userId, prompt})
     }
 
     return response;

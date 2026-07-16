@@ -46,3 +46,5 @@ drizzle/meta/
 # ESLint cache
 .eslintcache
 ```
+
+.trigger
