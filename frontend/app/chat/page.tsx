@@ -94,7 +94,7 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto px-6 py-8">
           {messages.length === 0 && !loading && (
             <div className="mt-32 text-center">
-              <h1 className="text-3xl font-bold">🧠 AIMemory</h1>
+              <h1 className="text-3xl font-bold">🧠 AIMemory Engine</h1>
 
               <p className="mt-3 text-slate-500">
                 What would you like me to remember?
