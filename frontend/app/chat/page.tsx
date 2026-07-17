@@ -23,14 +23,8 @@ export default function ChatPage() {
 
   async function fetchMessages() {
     try {
-      const res = await fetch("http://localhost:5000/api/chat", {
-        credentials: "include",
-        method: "GET",
-      });
-
-      const data = await res.json();
-
-      setMessages(data.messages ?? data);
+      const res = await api.get("/chat");
+      setMessages(res.data.messages ?? res.data);
     } catch (err) {
       console.error(err);
     }
@@ -74,18 +68,11 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/chat", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: currentPrompt,
-        }),
+      const res = await api.post("/chat", {
+        prompt: currentPrompt,
       });
 
-      const data = await res.json();
+      const data = res.data;
 
       const aiMessage: Message = {
         id: crypto.randomUUID(),
