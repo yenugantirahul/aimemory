@@ -1,7 +1,15 @@
 import { UUID } from "node:crypto";
 import { llmService } from "../llm/llm.service.js";
 import { memoryService } from "../memory/memory.service.js";
-import { helloWorldTask } from "../../trigger/example.js";
+import { db } from "../../database/db.js";
+import { message } from "../../database/schema.js";
+import { eq, asc } from "drizzle-orm";
+
+import {
+  dbInsertPrompt,
+  dbInsertResponse,
+  helloWorldTask,
+} from "../../trigger/example.js";
 export const chatService = {
   async getResponse(userId: UUID, prompt: string) {
     // Retrieve memories
@@ -41,10 +49,21 @@ Answer naturally using the memories and known facts only if they are relevant.
 
     // Queue memory processing in the background
     if (response) {
-      
-      await helloWorldTask.trigger({userId, prompt})
+      await helloWorldTask.trigger({ userId, prompt });
+      await dbInsertPrompt.trigger({ userId, prompt });
+      await dbInsertResponse.trigger({ userId, response });
     }
 
     return response;
+  },
+
+  async getMessages(uId: UUID) {
+    const messages = await db
+      .select()
+      .from(message)
+      .where(eq(message.userId, uId))
+      .orderBy(asc(message.createdAt));
+
+    return messages;
   },
 };

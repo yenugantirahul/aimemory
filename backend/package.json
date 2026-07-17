@@ -27,6 +27,7 @@
   "type": "module",
   "dependencies": {
     "@google/genai": "^2.11.0",
+    "@paralleldrive/cuid2": "^3.3.0",
     "@qdrant/js-client-rest": "^1.18.0",
     "@trigger.dev/sdk": "4.5.4",
     "@types/cors": "^2.8.19",

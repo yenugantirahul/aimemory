@@ -9,11 +9,12 @@ export default function Navbar() {
   // Replace with your auth session later
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{ name: string } | null>(null);
-
+   
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await api.get("/auth/get-session");
+        
         if (res.status === 200 && res.data) {
           console.log(res.data);
           setIsAuthenticated(true);
