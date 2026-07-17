@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/axios";
-import axios from "axios";
 import { useEffect, useState } from "react";
 
 export default function Navbar() {

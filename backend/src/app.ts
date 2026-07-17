@@ -5,7 +5,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // Your Next.js frontend
+    origin: process.env.CORS_ORIGIN_URL, // Your Next.js frontend
     credentials: true,               // Required if using cookies
   })
 );
