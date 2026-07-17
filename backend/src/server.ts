@@ -3,12 +3,14 @@ import "dotenv/config";
 import app from "./app.js";
 import { connectDB } from "./database/db.js";
 import { toNodeHandler } from "better-auth/node";
+import express from "express";
 import  chatRouter  from "./modules/chat/chat.routes.js";
 import { auth } from "./auth.js";
 import { qdrantService } from "./clients/qdrant.client.js";
 
 const PORT = process.env.PORT || 5000;
 app.all("/api/auth/*path", toNodeHandler(auth));
+app.use(express.json());
 app.use("/api/chat", chatRouter);
 
 await qdrantService.createCollection()

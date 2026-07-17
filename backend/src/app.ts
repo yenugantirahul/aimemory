@@ -3,9 +3,12 @@ import cors from "cors";
 
 const app = express();
 
-app.use(cors());
-
-app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Your Next.js frontend
+    credentials: true,               // Required if using cookies
+  })
+);
 app.get("/health", (_, res) => {
   res.json({
     success: true,
