@@ -12,4 +12,10 @@ export const auth = betterAuth({
     enabled: true,
   },
   trustedOrigins: [process.env.CORS_ORIGIN_URL!],
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: process.env.NODE_ENV === "production" || process.env.CORS_ORIGIN_URL?.startsWith("https://") ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production" || process.env.CORS_ORIGIN_URL?.startsWith("https://") ? true : false,
+    },
+  },
 });
