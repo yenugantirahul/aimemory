@@ -8,8 +8,6 @@ export const client = new QdrantClient({
 
 export const qdrantService = {
   async createCollection() {
-    await client.deleteCollection("memories");
-
     const collections = await client.getCollections();
 
     const exists = collections.collections.some(
