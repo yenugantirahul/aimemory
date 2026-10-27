@@ -9,14 +9,13 @@ export default function Navbar() {
   // Replace with your auth session later
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{ name: string } | null>(null);
-   
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await api.get("/auth/get-session");
-        
+
         if (res.status === 200 && res.data) {
-          console.log(res.data);
           setIsAuthenticated(true);
           setUser(res.data.user);
         } else {
@@ -63,9 +62,6 @@ export default function Navbar() {
             </span>
           </div>
         </Link>
-
-        {/* Navigation */}
-        
 
         {/* Right */}
         <div className="flex items-center gap-3">

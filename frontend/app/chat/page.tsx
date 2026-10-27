@@ -1,6 +1,7 @@
 "use client";
 
 import api from "@/lib/axios";
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 
 interface Message {
@@ -21,33 +22,25 @@ export default function ChatPage() {
     });
   }, [messages, loading]);
 
-  async function fetchMessages() {
-    try {
-      const res = await api.get("/chat");
-      setMessages(res.data.messages ?? res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  }
   useEffect(() => {
-    fetchMessages();
-  }, []);
+    let cancelled = false;
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await api.get("/auth/get-session");
-
-        if (res.status === 200 && res.data) {
-          console.log(res.data);
-        } else {
+    api
+      .get("/chat")
+      .then((response) => {
+        if (!cancelled) {
+          setMessages(response.data.messages ?? response.data);
         }
-      } catch {
-        console.log("Error");
-      }
-    };
+      })
+      .catch((error: unknown) => {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          window.location.href = "/login";
+        }
+      });
 
-    checkAuth();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function sendMessage() {
