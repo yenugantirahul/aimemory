@@ -5,27 +5,32 @@ import Link from "next/link";
 import { Zap, AtSign, Lock, Eye, EyeOff } from "lucide-react";
 import api from "@/lib/axios";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const router = useRouter();
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(email: string, password: string) {
+    setError("");
+    setIsSubmitting(true);
+
     try {
-      const response = await api.post("/auth/sign-in/email", {
-        email,
-        password,
-      });
-      console.log("Login Succesful");
+      await api.post("/auth/sign-in/email", { email, password });
       window.location.href = "/";
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error(error.response?.data);
+        setError(
+          error.response?.data?.message ??
+            "Unable to sign in. Check your credentials and try again.",
+        );
+      } else {
+        setError("Unable to sign in. Please try again.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -108,12 +113,18 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Submit */}
+            {error && (
+              <p role="alert" className="text-sm text-red-600">
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-lg py-3 text-sm font-medium transition-colors"
+              disabled={isSubmitting}
+              className="w-full bg-slate-900 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 text-white rounded-lg py-3 text-sm font-medium transition-colors"
             >
-              Login
+              {isSubmitting ? "Signing in..." : "Login"}
             </button>
           </form>
         </div>
@@ -122,7 +133,7 @@ export default function LoginPage() {
         <p className="text-center text-sm text-slate-600 mt-6">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="font-semibold text-slate-900">
-            Sign In
+            Sign Up
           </Link>
         </p>
 

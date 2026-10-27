@@ -11,27 +11,31 @@ export default function SignupPage() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle Submit Function
   async function handleSubmit(name: string, email: string, password: string) {
-      try {
-    const response = await api.post("/auth/sign-up/email", {
-      name,
-      email,
-      password,
-    });
-     console.log("User Created")
-     router.push('/login')
-    
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(error.response?.data);
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await api.post("/auth/sign-up/email", { name, email, password });
+      router.push("/login");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(
+          error.response?.data?.message ??
+            "Unable to create your account. Please check your details.",
+        );
+      } else {
+        setError("Unable to create your account. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-  }
   }
 
   return (
@@ -108,12 +112,6 @@ export default function SignupPage() {
                 >
                   Password
                 </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-sky-500 hover:text-sky-600"
-                >
-                  Forgot Password?
-                </Link>
               </div>
               <div className="flex items-center border border-slate-200 rounded-lg px-3.5 py-3 focus-within:border-slate-400 transition-colors">
                 <Lock className="w-4 h-4 text-slate-400 mr-2.5 shrink-0" />
@@ -139,23 +137,18 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Remember me */}
-            <label className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
-              />
-              Remember for 30 days
-            </label>
+            {error && (
+              <p role="alert" className="text-sm text-red-600">
+                {error}
+              </p>
+            )}
 
-            {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-lg py-3 text-sm font-medium transition-colors"
+              disabled={isSubmitting}
+              className="w-full bg-slate-900 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 text-white rounded-lg py-3 text-sm font-medium transition-colors"
             >
-              Sign Up
+              {isSubmitting ? "Creating account..." : "Sign Up"}
             </button>
           </form>
         </div>

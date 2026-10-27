@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: aimemory-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm run build
+    startCommand: node dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Public URL of the Vercel frontend (the browser's origin)
+      - key: BETTER_AUTH_URL
+        sync: false
+      # Same frontend URL; comma-separate to allow several (e.g. preview URLs)
+      - key: CORS_ORIGIN_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USERNAME
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: TRIGGER_SECRET_KEY
+        sync: false
