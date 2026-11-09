@@ -9,7 +9,6 @@ export const memoryService = {
     const embedding = await this.generateEmbedding(prompt);
 
     await qdrantService.upsertMemory(userId, embedding, {
-      userId: "123",
       prompt,
     });
     await neo4jService.search(prompt);
@@ -17,10 +16,11 @@ export const memoryService = {
 
   // Retrieve memories from Qdrant
  async retrieveMemories(userId: UUID, prompt: string) {
-  const embedding = await this.generateEmbedding(prompt);
-
+  // The graph lookup doesn't need the embedding, so run it alongside.
   const [qdrantMemories, relations] = await Promise.all([
-    qdrantService.searchMemory(userId, embedding, 5),
+    this.generateEmbedding(prompt).then((embedding) =>
+      qdrantService.searchMemory(userId, embedding, 5),
+    ),
     neo4jService.search(userId),
   ]);
 

@@ -1,43 +1,29 @@
 import "dotenv/config";
 
 import app from "./app.js";
+import { serverEnv } from "./config/server-env.js";
 import { connectDB } from "./database/db.js";
-import { toNodeHandler } from "better-auth/node";
-import express from "express";
-import  chatRouter  from "./modules/chat/chat.routes.js";
-import { auth } from "./auth.js";
 import { qdrantService } from "./clients/qdrant.client.js";
-
-const PORT = Number(process.env.PORT) || 5000;
-app.all("/api/auth/*path", toNodeHandler(auth));
-app.use(express.json());
-app.use("/api/chat", chatRouter);
-
-app.use(
-  (
-    err: unknown,
-    _req: express.Request,
-    res: express.Response,
-    _next: express.NextFunction,
-  ) => {
-    console.error(err);
-    res.status(500).json({ message: "Internal server error" });
-  },
-);
+import { neo4jService } from "./clients/neo4j.client.js";
 
 async function start() {
   try {
     await connectDB();
 
-    // Don't let a vector-DB hiccup keep the whole API down.
-    try {
-      await qdrantService.createCollection();
-    } catch (err) {
-      console.error("Qdrant setup failed (continuing):", err);
+    // Don't let a vector/graph-DB hiccup keep the whole API down.
+    const [qdrantSetup, neo4jSetup] = await Promise.allSettled([
+      qdrantService.createCollection(),
+      neo4jService.setup(),
+    ]);
+    if (qdrantSetup.status === "rejected") {
+      console.error("Qdrant setup failed (continuing):", qdrantSetup.reason);
+    }
+    if (neo4jSetup.status === "rejected") {
+      console.error("Neo4j setup failed (continuing):", neo4jSetup.reason);
     }
 
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on ${PORT}`);
+    app.listen(serverEnv.PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on ${serverEnv.PORT}`);
     });
   } catch (err) {
     console.error("Failed to start server:", err);

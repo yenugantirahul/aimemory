@@ -1,9 +1,11 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { randomUUID, UUID } from "node:crypto";
+import { env } from "../config/env.js";
+import { MemoryPayload } from "../schemas/memory.schema.js";
 
 export const client = new QdrantClient({
-  url: process.env.QDRANT_URL!,
-  apiKey: process.env.QDRANT_API_KEY!,
+  url: env.QDRANT_URL,
+  apiKey: env.QDRANT_API_KEY,
 });
 
 export const qdrantService = {
@@ -35,7 +37,7 @@ export const qdrantService = {
   async upsertMemory(
     userId: string,
     embedding: number[],
-    payload: Record<string, any>,
+    payload: Omit<MemoryPayload, "userId">,
   ) {
     const memoryId = randomUUID();
 
@@ -48,7 +50,7 @@ export const qdrantService = {
           payload: {
             ...payload,
             userId,
-          },
+          } satisfies MemoryPayload,
         },
       ],
     });
