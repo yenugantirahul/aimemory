@@ -1,44 +1,49 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { env } from "../config/env.js";
+import { Graph, graphSchema } from "../schemas/memory.schema.js";
 
-export interface Entity {
-  name: string;
-  type: string;
-}
+export type { Entity, Relationship, Graph } from "../schemas/memory.schema.js";
 
-export interface Relationship {
-  relation: string;
-  entity: string;
-  entityType: string;
-}
+const CHAT_MODEL = "gemini-3.1-flash-lite";
 
-export interface Graph {
-  entities: Entity[];
-  relationships: Relationship[];
-}
+// Chat replies don't need deep reasoning; minimal thinking cuts
+// time-to-first-token from several seconds to under one.
+const chatThinkingConfig = { thinkingLevel: ThinkingLevel.MINIMAL };
 
 export class GeminiService {
   private ai: GoogleGenAI;
 
   constructor() {
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is missing");
-    }
-
     this.ai = new GoogleGenAI({
-      apiKey,
+      apiKey: env.GEMINI_API_KEY,
     });
   }
 
   // Generates a normal text response
   async generate(prompt: string): Promise<string> {
     const response = await this.ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
+      model: CHAT_MODEL,
       contents: prompt,
+      config: { thinkingConfig: chatThinkingConfig },
     });
 
     return response.text ?? "";
+  }
+
+  // Streams a text response chunk by chunk; aborting the signal stops generation.
+  async *generateStream(
+    prompt: string,
+    signal?: AbortSignal,
+  ): AsyncGenerator<string> {
+    const stream = await this.ai.models.generateContentStream({
+      model: CHAT_MODEL,
+      contents: prompt,
+      config: { abortSignal: signal, thinkingConfig: chatThinkingConfig },
+    });
+
+    for await (const chunk of stream) {
+      if (chunk.text) yield chunk.text;
+    }
   }
 
   // Extract entities and relationships
@@ -90,7 +95,22 @@ ${memory}
       throw new Error("Gemini returned an empty response.");
     }
 
-    return JSON.parse(text) as Graph;
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      throw new Error("Gemini returned invalid JSON for relationships.");
+    }
+
+    const graph = graphSchema.safeParse(json);
+
+    if (!graph.success) {
+      throw new Error(
+        `Gemini returned an unexpected relationships shape: ${graph.error.message}`,
+      );
+    }
+
+    return graph.data;
   }
 
   // Generates embeddings

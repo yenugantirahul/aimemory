@@ -6,6 +6,9 @@ export const llmService = {
     const res = await gemini.generate(prompt);
     return res;
   },
+  streamAiResponse(prompt: string, signal?: AbortSignal) {
+    return gemini.generateStream(prompt, signal);
+  },
   async generateEmbedding(text: string) {
     const res = await gemini.generateEmdb(text);
     return res;

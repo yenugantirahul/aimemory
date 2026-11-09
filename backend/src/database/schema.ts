@@ -103,7 +103,14 @@ export  const message = pgTable(
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [index("message_userId_idx").on(table.userId)],
+  // Matches the history query: filter by user, page by (created_at, id).
+  (table) => [
+    index("message_userId_createdAt_idx").on(
+      table.userId,
+      table.createdAt,
+      table.id,
+    ),
+  ],
 );
 
 export const userRelations = relations(user, ({ many }) => ({
